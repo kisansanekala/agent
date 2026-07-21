@@ -8,17 +8,40 @@
 </head>
 <body>
 
-<div class="admin-shell">
+<!-- AUTH SCREEN — gates the admin panel so it feels like a real, separate backend -->
+<div class="auth-screen" id="authScreen">
+  <form class="auth-card" id="authForm">
+    <a href="index.html" class="brand" style="margin-bottom:22px;"><span class="brand-mark"></span>Lapak.AI</a>
+    <h2 id="authTitle">Masuk Admin Panel</h2>
+    <p class="auth-sub" id="authSub">Masukin passcode buat kelola toko kamu.</p>
+    <div class="field">
+      <label for="authPass">Passcode</label>
+      <input type="password" id="authPass" placeholder="••••••" autocomplete="off" required minlength="4">
+    </div>
+    <div class="field" id="authPass2Wrap" style="display:none;">
+      <label for="authPass2">Ulangi Passcode</label>
+      <input type="password" id="authPass2" placeholder="••••••" autocomplete="off">
+    </div>
+    <p class="auth-error" id="authError" style="display:none;"></p>
+    <button type="submit" class="btn btn-coral" id="authSubmit" style="width:100%;">Masuk</button>
+    <p class="auth-note">Passcode disimpan cuma di browser ini — buat memisahkan tampilan Admin dari tampilan pelanggan.</p>
+  </form>
+</div>
+
+<div class="admin-shell" id="adminShell" style="display:none;">
   <aside class="admin-sidebar">
     <a href="index.html" class="brand"><span class="brand-mark"></span>Lapak.AI</a>
     <nav class="admin-nav">
       <button data-tab="ringkasan" class="active"><span class="ic">📊</span>Ringkasan</button>
       <button data-tab="profil"><span class="ic">🏪</span>Profil Toko</button>
-      <button data-tab="kb"><span class="ic">📚</span>Basis Pengetahuan</button>
+      <button data-tab="produk"><span class="ic">🖼️</span>Produk</button>
+      <button data-tab="faq"><span class="ic">❓</span>FAQ</button>
       <button data-tab="ai"><span class="ic">⚙️</span>Pengaturan AI</button>
       <button data-tab="uji"><span class="ic">💬</span>Uji Coba Chat</button>
     </nav>
-    <div class="admin-sidebar-foot">Lapak.AI Admin · v1.0<br>Data tersimpan di browser ini</div>
+    <a href="toko.html" target="_blank" class="view-store-link" id="viewStoreLink">🔗 Lihat Toko Publik</a>
+    <button class="logout-btn" id="logoutBtn">Keluar</button>
+    <div class="admin-sidebar-foot">Lapak.AI Admin · v2.0<br>Data tersimpan di browser ini</div>
   </aside>
 
   <main class="admin-main">
@@ -39,9 +62,9 @@
           <div class="value" id="statShopName" style="font-size:20px;">Belum diisi</div>
         </div>
         <div class="stat-card">
-          <div class="label">Item Basis Pengetahuan</div>
-          <div class="value" id="statKbCount">0</div>
-          <div class="delta">produk & FAQ tersimpan</div>
+          <div class="label">Produk Diupload</div>
+          <div class="value" id="statProductCount">0</div>
+          <div class="delta">lengkap dengan foto</div>
         </div>
         <div class="stat-card">
           <div class="label">Model AI Aktif</div>
@@ -56,12 +79,13 @@
 
       <div class="panel" style="margin-top:22px;">
         <h3>Langkah selanjutnya</h3>
-        <p class="panel-sub">Ikuti urutan ini biar Lapak.AI siap jawab chat pelanggan.</p>
+        <p class="panel-sub">Ikuti urutan ini biar Lapak.AI siap jawab chat pelanggan di halaman Toko Publik.</p>
         <ol style="padding-left:20px; color:var(--ink-soft); font-size:14.5px; line-height:2;">
           <li>Isi <strong>Profil Toko</strong> — nama, deskripsi, kontak.</li>
-          <li>Tambahkan produk & FAQ di <strong>Basis Pengetahuan</strong>.</li>
+          <li>Upload foto & detail di <strong>Produk</strong>.</li>
+          <li>Lengkapi <strong>FAQ</strong> buat pertanyaan yang sering muncul.</li>
           <li>Masukkan API key Groq di <strong>Pengaturan AI</strong>.</li>
-          <li>Coba ngobrol di <strong>Uji Coba Chat</strong>.</li>
+          <li>Buka <strong>Lihat Toko Publik</strong> buat lihat hasilnya sebagai pelanggan.</li>
         </ol>
       </div>
     </section>
@@ -71,7 +95,7 @@
       <div class="admin-topbar">
         <div>
           <h2>Profil Toko</h2>
-          <p>Informasi ini dipakai AI buat memperkenalkan tokomu ke pelanggan.</p>
+          <p>Informasi ini tampil di halaman Toko Publik dan dipakai AI buat memperkenalkan tokomu.</p>
         </div>
       </div>
       <div class="panel">
@@ -106,16 +130,28 @@
       </div>
     </section>
 
-    <!-- BASIS PENGETAHUAN -->
-    <section class="section-tab" id="tab-kb">
+    <!-- PRODUK -->
+    <section class="section-tab" id="tab-produk">
       <div class="admin-topbar">
         <div>
-          <h2>Basis Pengetahuan</h2>
-          <p>Daftar produk & pertanyaan yang sering ditanya pelanggan. AI cuma akan jawab berdasarkan data ini.</p>
+          <h2>Produk</h2>
+          <p>Upload foto & detail produk. Semua ini langsung tampil di Toko Publik dan jadi bahan jawaban AI.</p>
         </div>
-        <button class="btn btn-coral btn-sm" id="addKbItem">+ Tambah Item</button>
+        <button class="btn btn-coral btn-sm" id="addProduct">+ Tambah Produk</button>
       </div>
-      <div id="kbList"></div>
+      <div id="productList"></div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section-tab" id="tab-faq">
+      <div class="admin-topbar">
+        <div>
+          <h2>FAQ</h2>
+          <p>Pertanyaan yang sering ditanya pelanggan. AI akan pakai ini buat jawab di luar daftar produk.</p>
+        </div>
+        <button class="btn btn-coral btn-sm" id="addFaq">+ Tambah FAQ</button>
+      </div>
+      <div id="faqList"></div>
     </section>
 
     <!-- PENGATURAN AI -->
@@ -123,14 +159,14 @@
       <div class="admin-topbar">
         <div>
           <h2>Pengaturan AI</h2>
-          <p>Sambungkan Groq API supaya Lapak.AI bisa menjawab chat secara otomatis.</p>
+          <p>Sambungkan Groq API supaya Lapak.AI bisa menjawab chat pelanggan secara otomatis.</p>
         </div>
       </div>
       <div class="panel">
         <div class="field">
           <label for="groqKey">Groq API Key</label>
           <input type="password" id="groqKey" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx">
-          <p class="hint">Ambil kunci gratis di <strong>console.groq.com/keys</strong>. Kunci disimpan hanya di browser ini, tidak dikirim ke server manapun selain Groq.</p>
+          <p class="hint">Ambil kunci gratis di <strong>console.groq.com/keys</strong>. Kunci disimpan hanya di browser ini.</p>
         </div>
         <div class="field">
           <label for="groqModel">Model</label>
@@ -145,7 +181,7 @@
       </div>
       <div class="panel">
         <h3>Preview System Prompt</h3>
-        <p class="panel-sub">Ini instruksi yang otomatis dikirim ke AI berdasarkan Profil Toko & Basis Pengetahuan kamu.</p>
+        <p class="panel-sub">Ini instruksi yang otomatis dikirim ke AI berdasarkan Profil Toko, Produk & FAQ kamu — sama persis dengan yang dipakai di Toko Publik.</p>
         <div class="prompt-preview" id="promptPreview">Isi Profil Toko dulu buat lihat preview di sini.</div>
       </div>
     </section>
@@ -155,7 +191,7 @@
       <div class="admin-topbar">
         <div>
           <h2>Uji Coba Chat</h2>
-          <p>Coba ngobrol langsung sebagai pelanggan buat lihat respons AI-nya.</p>
+          <p>Coba ngobrol langsung sebagai pelanggan buat lihat respons AI-nya, sebelum pelanggan asli lihat.</p>
         </div>
       </div>
       <div class="panel">
@@ -173,6 +209,7 @@
   </main>
 </div>
 
+<script src="js/shared.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>
