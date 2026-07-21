@@ -1,42 +1,103 @@
-// Lapak.AI — Admin Panel logic
-// All data is stored in localStorage on this browser only.
+// Lapak.AI — Admin Panel logic (v2)
+// All data lives in localStorage on this browser only — see js/shared.js
+// for the schema + functions shared with the public storefront (store.js).
 
-const STORE_KEY = 'lapakai_state_v1';
+let state = lapakaiLoad();
 
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    if(!raw) throw new Error('empty');
-    return JSON.parse(raw);
-  }catch(e){
-    return {
-      profile: { name:'', desc:'', phone:'', hours:'', tone:'ramah dan santai, sesekali pakai emoji' },
-      kb: [],
-      ai: { key:'', model:'openai/gpt-oss-120b' },
-      testHistory: [],
-      msgCount: 0
-    };
+/* ---------------- Auth gate ---------------- */
+const authScreen = document.getElementById('authScreen');
+const adminShell = document.getElementById('adminShell');
+const authTitle = document.getElementById('authTitle');
+const authSub = document.getElementById('authSub');
+const authForm = document.getElementById('authForm');
+const authPass = document.getElementById('authPass');
+const authPass2Wrap = document.getElementById('authPass2Wrap');
+const authPass2 = document.getElementById('authPass2');
+const authError = document.getElementById('authError');
+const authSubmit = document.getElementById('authSubmit');
+
+const isFirstRun = !state.auth.passcode;
+
+function renderAuthMode(){
+  if(isFirstRun){
+    authTitle.textContent = 'Buat Passcode Admin';
+    authSub.textContent = 'Karena ini pertama kali dibuka, buat passcode dulu buat kunci Admin Panel toko kamu.';
+    authPass2Wrap.style.display = 'block';
+    authSubmit.textContent = 'Buat & Masuk';
+  } else {
+    authTitle.textContent = 'Masuk Admin Panel';
+    authSub.textContent = 'Masukin passcode buat kelola toko kamu.';
+    authPass2Wrap.style.display = 'none';
+    authSubmit.textContent = 'Masuk';
   }
 }
+renderAuthMode();
 
-function saveState(){
-  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+authForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  authError.style.display = 'none';
+
+  if(isFirstRun){
+    if(authPass.value.length < 4){
+      authError.textContent = 'Passcode minimal 4 karakter ya.';
+      authError.style.display = 'block';
+      return;
+    }
+    if(authPass.value !== authPass2.value){
+      authError.textContent = 'Konfirmasi passcode belum sama.';
+      authError.style.display = 'block';
+      return;
+    }
+    state.auth.passcode = authPass.value;
+    lapakaiSave(state);
+    unlockAdmin();
+  } else {
+    if(authPass.value !== state.auth.passcode){
+      authError.textContent = 'Passcode salah, coba lagi.';
+      authError.style.display = 'block';
+      authPass.value = '';
+      return;
+    }
+    unlockAdmin();
+  }
+});
+
+function unlockAdmin(){
+  authScreen.style.display = 'none';
+  adminShell.style.display = 'grid';
+  initAdminUI();
 }
 
-let state = loadState();
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  adminShell.style.display = 'none';
+  authScreen.style.display = 'flex';
+  authPass.value = '';
+  if(authPass2) authPass2.value = '';
+  authError.style.display = 'none';
+});
 
 /* ---------------- Tabs ---------------- */
-const navButtons = document.querySelectorAll('.admin-nav button');
-navButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    navButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab === 'ringkasan') refreshSummary();
-    if(btn.dataset.tab === 'ai') refreshPromptPreview();
+function initAdminUI(){
+  const navButtons = document.querySelectorAll('.admin-nav button');
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      if(btn.dataset.tab === 'ringkasan') refreshSummary();
+      if(btn.dataset.tab === 'ai') refreshPromptPreview();
+    });
   });
-});
+
+  fillProfileForm();
+  fillAiForm();
+  renderProducts();
+  renderFaqs();
+  refreshSummary();
+  refreshPromptPreview();
+  state.testHistory.forEach(m => renderTestLine(m.role, m.content));
+}
 
 /* ---------------- Profil Toko ---------------- */
 const shopName = document.getElementById('shopName');
@@ -61,7 +122,7 @@ document.getElementById('saveProfile').addEventListener('click', () => {
     hours: shopHours.value.trim(),
     tone: shopTone.value
   };
-  saveState();
+  lapakaiSave(state);
   flashSaved('profileSaved');
   refreshSummary();
   refreshPromptPreview();
@@ -73,63 +134,211 @@ function flashSaved(id){
   setTimeout(() => { el.style.display = 'none'; }, 1800);
 }
 
-/* ---------------- Basis Pengetahuan ---------------- */
-const kbList = document.getElementById('kbList');
+/* ---------------- Produk (with photo gallery) ---------------- */
+const productList = document.getElementById('productList');
 
-function renderKb(){
-  kbList.innerHTML = '';
-  if(state.kb.length === 0){
-    kbList.innerHTML = '<div class="panel"><p class="panel-sub" style="margin:0;">Belum ada item. Klik "+ Tambah Item" buat mulai isi produk atau FAQ.</p></div>';
+function renderProducts(){
+  productList.innerHTML = '';
+  if(state.products.length === 0){
+    productList.innerHTML = '<div class="panel"><p class="panel-sub" style="margin:0;">Belum ada produk. Klik "+ Tambah Produk" buat mulai upload foto & isi detail.</p></div>';
     return;
   }
-  state.kb.forEach((item, idx) => {
+  state.products.forEach((prod) => {
+    const card = document.createElement('div');
+    card.className = 'product-editor';
+    card.innerHTML = `
+      <div class="product-editor-photos">
+        <div class="thumb-grid" data-id="${prod.id}">
+          ${prod.images.map((src, i) => `
+            <div class="thumb">
+              <img src="${src}" alt="foto produk ${i+1}">
+              <button type="button" class="thumb-remove" data-id="${prod.id}" data-img="${i}" title="Hapus foto">✕</button>
+            </div>
+          `).join('')}
+          <label class="dropzone dropzone-sm" data-id="${prod.id}">
+            <input type="file" accept="image/*" multiple hidden>
+            <span class="dz-icon">📷</span>
+            <span>Tambah foto</span>
+          </label>
+        </div>
+      </div>
+      <div class="product-editor-fields">
+        <div class="field-row">
+          <div class="field">
+            <label>Nama Produk</label>
+            <input type="text" data-id="${prod.id}" data-field="name" value="${lapakaiEscapeHtml(prod.name)}" placeholder="Contoh: Kopi Robusta 200gr">
+          </div>
+          <div class="field">
+            <label>Harga (Rp)</label>
+            <input type="number" min="0" data-id="${prod.id}" data-field="price" value="${prod.price || ''}" placeholder="32000">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Kategori</label>
+            <input type="text" data-id="${prod.id}" data-field="category" value="${lapakaiEscapeHtml(prod.category)}" placeholder="Contoh: Kopi Bubuk">
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end;">
+            <label class="stock-toggle">
+              <input type="checkbox" data-id="${prod.id}" data-field="stock" ${prod.stock !== false ? 'checked' : ''}>
+              Stok tersedia
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Deskripsi (dipakai AI buat jawab pelanggan)</label>
+          <textarea data-id="${prod.id}" data-field="desc" placeholder="Contoh: Roasting tiap hari Senin, rasa nutty & rendah asam.">${lapakaiEscapeHtml(prod.desc)}</textarea>
+        </div>
+        <button class="kb-remove" data-remove-product="${prod.id}">Hapus Produk</button>
+      </div>
+    `;
+    productList.appendChild(card);
+  });
+
+  // text/number field bindings
+  productList.querySelectorAll('input[data-field], textarea[data-field]').forEach(inp => {
+    const evt = inp.type === 'checkbox' ? 'change' : 'input';
+    inp.addEventListener(evt, (e) => {
+      const id = e.target.dataset.id;
+      const field = e.target.dataset.field;
+      const prod = state.products.find(p => p.id === id);
+      if(!prod) return;
+      if(field === 'stock'){
+        prod.stock = e.target.checked;
+      } else if(field === 'price'){
+        prod.price = Number(e.target.value) || 0;
+      } else {
+        prod[field] = e.target.value;
+      }
+      lapakaiSave(state);
+      refreshPromptPreview();
+    });
+  });
+
+  // remove product
+  productList.querySelectorAll('[data-remove-product]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.dataset.removeProduct;
+      state.products = state.products.filter(p => p.id !== id);
+      lapakaiSave(state);
+      renderProducts();
+      refreshSummary();
+      refreshPromptPreview();
+    });
+  });
+
+  // remove single image
+  productList.querySelectorAll('.thumb-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      const imgIdx = Number(e.target.dataset.img);
+      const prod = state.products.find(p => p.id === id);
+      if(!prod) return;
+      prod.images.splice(imgIdx, 1);
+      lapakaiSave(state);
+      renderProducts();
+    });
+  });
+
+  // dropzones (click-to-browse + drag & drop)
+  productList.querySelectorAll('.dropzone').forEach(zone => {
+    const input = zone.querySelector('input[type=file]');
+    const id = zone.dataset.id;
+
+    input.addEventListener('change', () => handleFiles(id, input.files, zone));
+
+    ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, (e) => {
+      e.preventDefault(); zone.classList.add('dragover');
+    }));
+    ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, (e) => {
+      e.preventDefault(); zone.classList.remove('dragover');
+    }));
+    zone.addEventListener('drop', (e) => {
+      handleFiles(id, e.dataTransfer.files, zone);
+    });
+  });
+}
+
+async function handleFiles(productId, fileList, zone){
+  const prod = state.products.find(p => p.id === productId);
+  if(!prod || !fileList || !fileList.length) return;
+  zone.classList.add('dz-busy');
+  for(const file of Array.from(fileList)){
+    if(!file.type.startsWith('image/')) continue;
+    try{
+      const dataUrl = await lapakaiResizeImage(file);
+      prod.images.push(dataUrl);
+    }catch(err){
+      console.error(err);
+    }
+  }
+  zone.classList.remove('dz-busy');
+  lapakaiSave(state);
+  renderProducts();
+  refreshPromptPreview();
+}
+
+document.getElementById('addProduct').addEventListener('click', () => {
+  state.products.push({
+    id: lapakaiUid(), name:'', price:0, category:'', desc:'', images:[], stock:true
+  });
+  lapakaiSave(state);
+  renderProducts();
+  refreshSummary();
+});
+
+/* ---------------- FAQ ---------------- */
+const faqList = document.getElementById('faqList');
+
+function renderFaqs(){
+  faqList.innerHTML = '';
+  if(state.faqs.length === 0){
+    faqList.innerHTML = '<div class="panel"><p class="panel-sub" style="margin:0;">Belum ada FAQ. Klik "+ Tambah FAQ" buat isi pertanyaan yang sering ditanya pelanggan.</p></div>';
+    return;
+  }
+  state.faqs.forEach((item) => {
     const row = document.createElement('div');
     row.className = 'kb-item';
     row.innerHTML = `
       <div>
-        <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:6px;">Judul / Nama Produk</label>
-        <input type="text" data-idx="${idx}" data-field="title" value="${escapeHtml(item.title)}" placeholder="Contoh: Kopi Robusta 200gr">
+        <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:6px;">Pertanyaan</label>
+        <input type="text" data-id="${item.id}" data-field="q" value="${lapakaiEscapeHtml(item.q)}" placeholder="Contoh: Apakah bisa COD?">
       </div>
       <div>
-        <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:6px;">Detail / Jawaban</label>
-        <textarea data-idx="${idx}" data-field="detail" placeholder="Contoh: Harga Rp32.000, stok selalu ready, roasting tiap hari Senin.">${escapeHtml(item.detail)}</textarea>
+        <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:6px;">Jawaban</label>
+        <textarea data-id="${item.id}" data-field="a" placeholder="Contoh: Bisa untuk area Sumedang kota.">${lapakaiEscapeHtml(item.a)}</textarea>
       </div>
-      <button class="kb-remove" data-idx="${idx}">Hapus</button>
+      <button class="kb-remove" data-remove-faq="${item.id}">Hapus</button>
     `;
-    kbList.appendChild(row);
+    faqList.appendChild(row);
   });
 
-  kbList.querySelectorAll('input, textarea').forEach(inp => {
+  faqList.querySelectorAll('input, textarea').forEach(inp => {
     inp.addEventListener('input', (e) => {
-      const idx = Number(e.target.dataset.idx);
+      const id = e.target.dataset.id;
       const field = e.target.dataset.field;
-      state.kb[idx][field] = e.target.value;
-      saveState();
-      refreshPromptPreview();
+      const item = state.faqs.find(f => f.id === id);
+      if(item){ item[field] = e.target.value; lapakaiSave(state); refreshPromptPreview(); }
     });
   });
-  kbList.querySelectorAll('.kb-remove').forEach(btn => {
+  faqList.querySelectorAll('[data-remove-faq]').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const idx = Number(e.target.dataset.idx);
-      state.kb.splice(idx, 1);
-      saveState();
-      renderKb();
+      const id = e.target.dataset.removeFaq;
+      state.faqs = state.faqs.filter(f => f.id !== id);
+      lapakaiSave(state);
+      renderFaqs();
       refreshSummary();
       refreshPromptPreview();
     });
   });
 }
 
-document.getElementById('addKbItem').addEventListener('click', () => {
-  state.kb.push({ title:'', detail:'' });
-  saveState();
-  renderKb();
+document.getElementById('addFaq').addEventListener('click', () => {
+  state.faqs.push({ id: lapakaiUid(), q:'', a:'' });
+  lapakaiSave(state);
+  renderFaqs();
   refreshSummary();
 });
-
-function escapeHtml(str){
-  return (str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
 
 /* ---------------- Pengaturan AI ---------------- */
 const groqKey = document.getElementById('groqKey');
@@ -143,38 +352,20 @@ function fillAiForm(){
 document.getElementById('saveAiSettings').addEventListener('click', () => {
   state.ai.key = groqKey.value.trim();
   state.ai.model = groqModel.value;
-  saveState();
+  lapakaiSave(state);
   flashSaved('aiSaved');
   refreshSummary();
 });
 
-function buildSystemPrompt(){
-  const p = state.profile;
-  const kbText = state.kb
-    .filter(i => i.title || i.detail)
-    .map(i => `- ${i.title}: ${i.detail}`)
-    .join('\n');
-
-  return [
-    `Kamu adalah asisten chat untuk toko "${p.name || '(nama toko belum diisi)'}".`,
-    p.desc ? `Deskripsi toko: ${p.desc}` : null,
-    p.hours ? `Jam operasional: ${p.hours}` : null,
-    p.phone ? `Kontak WhatsApp toko: ${p.phone}` : null,
-    `Gaya bahasa balasan: ${p.tone}.`,
-    `Jawab HANYA berdasarkan informasi produk/FAQ berikut. Jika pelanggan menanyakan hal di luar data ini, jawab dengan jujur bahwa kamu akan menanyakan ke pemilik toko dulu.`,
-    kbText ? `Data produk & FAQ:\n${kbText}` : `(Belum ada data produk/FAQ — jawab secara umum dan ramah dulu.)`
-  ].filter(Boolean).join('\n\n');
-}
-
 function refreshPromptPreview(){
   const el = document.getElementById('promptPreview');
-  if(el) el.textContent = buildSystemPrompt();
+  if(el) el.textContent = lapakaiBuildSystemPrompt(state);
 }
 
 /* ---------------- Ringkasan ---------------- */
 function refreshSummary(){
   document.getElementById('statShopName').textContent = state.profile.name || 'Belum diisi';
-  document.getElementById('statKbCount').textContent = state.kb.length;
+  document.getElementById('statProductCount').textContent = state.products.length;
   document.getElementById('statModel').textContent = state.ai.model;
   document.getElementById('statMsgCount').textContent = state.msgCount;
 
@@ -185,6 +376,11 @@ function refreshSummary(){
   } else {
     badge.textContent = 'Belum disambungkan ke AI';
     badge.className = 'badge warn';
+  }
+
+  const storeLink = document.getElementById('viewStoreLink');
+  if(storeLink){
+    storeLink.classList.toggle('disabled', !state.profile.name);
   }
 }
 
@@ -221,7 +417,7 @@ async function sendTestMessage(){
   testInput.value = '';
   state.testHistory.push({ role:'user', content:text });
   state.msgCount++;
-  saveState();
+  lapakaiSave(state);
   refreshSummary();
 
   const thinkingLine = document.createElement('div');
@@ -232,48 +428,16 @@ async function sendTestMessage(){
   testChatBody.scrollTop = testChatBody.scrollHeight;
 
   try{
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.ai.key}`
-      },
-      body: JSON.stringify({
-        model: state.ai.model,
-        messages: [
-          { role:'system', content: buildSystemPrompt() },
-          ...state.testHistory.slice(-8)
-        ],
-        temperature: 0.6
-      })
-    });
-
-    const data = await response.json();
+    const reply = await lapakaiCallGroq(state, state.testHistory);
     document.getElementById('thinkingLine')?.remove();
-
-    if(!response.ok){
-      const msg = data?.error?.message || 'Terjadi kesalahan saat menghubungi Groq API.';
-      renderTestLine('assistant', `⚠️ ${msg}`);
-      return;
-    }
-
-    const reply = data.choices?.[0]?.message?.content || 'Maaf, saya tidak bisa memproses itu.';
     renderTestLine('assistant', reply);
     state.testHistory.push({ role:'assistant', content:reply });
-    saveState();
+    lapakaiSave(state);
   }catch(err){
     document.getElementById('thinkingLine')?.remove();
-    renderTestLine('assistant', '⚠️ Gagal terhubung ke Groq API. Cek koneksi internet & API key kamu.');
+    renderTestLine('assistant', `⚠️ ${err.message}`);
   }
 }
 
 testSend.addEventListener('click', sendTestMessage);
 testInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') sendTestMessage(); });
-
-/* ---------------- Init ---------------- */
-fillProfileForm();
-fillAiForm();
-renderKb();
-refreshSummary();
-refreshPromptPreview();
-state.testHistory.forEach(m => renderTestLine(m.role, m.content));
