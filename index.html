@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lapak.AI — Asisten AI buat Toko Online Kamu</title>
+<meta name="description" content="Lapak.AI jagain chat toko online kamu 24 jam. Jawab pertanyaan pelanggan otomatis, kapan aja, tanpa perlu begadang.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-row">
+    <a href="index.html" class="brand"><span class="brand-mark"></span>Lapak.AI</a>
+    <div class="nav-links">
+      <a href="#fitur">Fitur</a>
+      <a href="#cara-kerja">Cara kerja</a>
+      <a href="#harga">Harga</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+    <div class="nav-cta">
+      <a href="admin.html" class="btn btn-ghost btn-sm">Masuk</a>
+      <a href="admin.html" class="btn btn-coral btn-sm">Coba Gratis</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">Lapak Buka 24 Jam</span>
+      <h1>Toko lo tetep <em>jawab chat</em>,<br>meski lo lagi tidur.</h1>
+      <p class="hero-sub">Lapak.AI belajar dari produk dan FAQ toko kamu, terus jawab pertanyaan pelanggan di chat secara otomatis — cepet, sopan, dan gak pernah cuti.</p>
+      <div class="hero-ctas">
+        <a href="admin.html" class="btn btn-coral">Setup Toko Sekarang</a>
+        <a href="#cara-kerja" class="btn btn-ghost">Lihat cara kerjanya</a>
+      </div>
+      <div class="hero-proof">
+        <div><b>24/7</b>respon otomatis</div>
+        <div><b>&lt;2 detik</b>rata-rata balas</div>
+        <div><b>Rp0</b>buat mulai coba</div>
+      </div>
+    </div>
+
+    <div class="signboard" aria-label="Demo percakapan langsung">
+      <div class="signboard-head">
+        <div class="signboard-title"><span class="signboard-dot"></span>Kedai Kopi Sumedang</div>
+        <div class="signboard-tag">LIVE DEMO</div>
+      </div>
+      <div class="signboard-body" id="demoChat">
+        <!-- chat lines injected by js -->
+      </div>
+      <div class="signboard-input">
+        <input type="text" id="demoInput" placeholder="Coba tanya: ada kopi robusta gak?" autocomplete="off">
+        <button id="demoSend" aria-label="Kirim">➤</button>
+      </div>
+      <p class="signboard-hint">Demo tersimulasi — pasang di toko kamu sendiri lewat Admin Panel</p>
+    </div>
+  </div>
+</header>
+
+<section id="fitur">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Fitur</span>
+      <h2>Satu asisten, tiga tugas berat toko kamu.</h2>
+      <p>Semua diatur dari satu Admin Panel — gak perlu tim CS, gak perlu ngoding.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>Jawab Chat Otomatis</h3>
+        <p>Pelanggan tanya stok, harga, atau cara order — Lapak.AI langsung jawab pakai bahasa yang natural, bukan template kaku.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Basis Pengetahuan Toko</h3>
+        <p>Masukin daftar produk dan FAQ sekali aja. AI otomatis pakai info itu buat jawab, dan gampang diupdate kapan pun.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Ngebut, Ramah Kantong</h3>
+        <p>Ditenagai inferensi super cepat, biar pelanggan gak nunggu lama — dan biaya per chat tetap kecil.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cara-kerja">
+  <div class="container">
+    <div class="board">
+      <div class="section-head">
+        <span class="eyebrow on-dark">Cara Kerja</span>
+        <h2>Buka lapak digital dalam 4 langkah.</h2>
+        <p>Gak perlu server, gak perlu tim IT. Semua diatur dari Admin Panel Lapak.AI.</p>
+      </div>
+      <div class="board-row">
+        <div class="board-item">
+          <div class="jam">01 · SETUP</div>
+          <h4>Isi Profil Toko</h4>
+          <p>Nama toko, deskripsi singkat, dan nomor kontak.</p>
+        </div>
+        <div class="board-item">
+          <div class="jam">02 · ISI DATA</div>
+          <h4>Tambah Produk & FAQ</h4>
+          <p>Daftar produk, harga, dan pertanyaan yang sering ditanya.</p>
+        </div>
+        <div class="board-item">
+          <div class="jam">03 · SAMBUNGKAN AI</div>
+          <h4>Pasang API Key</h4>
+          <p>Masukin kunci API sekali, Lapak.AI siap jalan otomatis.</p>
+        </div>
+        <div class="board-item">
+          <div class="jam">04 · UJI COBA</div>
+          <h4>Tes Langsung</h4>
+          <p>Coba chat sendiri di panel sebelum dipasang ke toko.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="harga">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Harga</span>
+      <h2>Mulai gratis, naik kalau lapak makin rame.</h2>
+      <p>Semua paket pakai kunci API kamu sendiri — biaya AI dihitung terpisah, transparan.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">RINTISAN</div>
+        <div class="price-amount">Gratis</div>
+        <ul class="price-list">
+          <li>1 toko</li>
+          <li>Sampai 20 produk/FAQ</li>
+          <li>Admin Panel penuh</li>
+          <li>Uji coba chat tanpa batas</li>
+        </ul>
+        <a href="admin.html" class="btn btn-ghost">Mulai Gratis</a>
+      </div>
+      <div class="price-card featured">
+        <span class="price-badge">PALING LARIS</span>
+        <div class="price-name">LAPAK PRO</div>
+        <div class="price-amount">Rp49rb<span>/bulan</span></div>
+        <ul class="price-list">
+          <li>3 toko</li>
+          <li>Produk & FAQ tanpa batas</li>
+          <li>Riwayat percakapan</li>
+          <li>Widget siap tempel di website</li>
+        </ul>
+        <a href="admin.html" class="btn btn-coral">Coba Lapak Pro</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">GROSIR</div>
+        <div class="price-amount">Custom</div>
+        <ul class="price-list">
+          <li>Banyak toko / cabang</li>
+          <li>Dukungan prioritas</li>
+          <li>Integrasi WhatsApp Business</li>
+          <li>Laporan mingguan</li>
+        </ul>
+        <a href="admin.html" class="btn btn-ghost">Hubungi Kami</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Lapak kamu udah siap jawab chat sendiri?</h2>
+      <a href="admin.html" class="btn btn-ghost">Buka Admin Panel →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="index.html" class="brand" style="color:#F7F1E4;margin-bottom:14px;"><span class="brand-mark"></span>Lapak.AI</a>
+        <p style="color:rgba(247,241,228,.6);font-size:14px;max-width:280px;">Asisten AI yang jagain chat toko online UMKM Indonesia, 24 jam nonstop.</p>
+      </div>
+      <div>
+        <h5>Produk</h5>
+        <a href="#fitur">Fitur</a>
+        <a href="#harga">Harga</a>
+        <a href="admin.html">Admin Panel</a>
+      </div>
+      <div>
+        <h5>Perusahaan</h5>
+        <a href="#cara-kerja">Cara Kerja</a>
+        <a href="#">Tentang Kami</a>
+        <a href="#">Kontak</a>
+      </div>
+      <div>
+        <h5>Dibangun Dengan</h5>
+        <a href="#">Groq API</a>
+        <a href="#">GitHub Pages</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>©️ 2026 Lapak.AI. Dibangun buat UMKM Indonesia.</span>
+      <span>Dibuat oleh Riksan</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
