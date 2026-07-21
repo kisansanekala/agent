@@ -422,6 +422,20 @@ footer{
   font-family:var(--font-mono); font-size:11.5px; color:rgba(247,241,228,.45);
   padding-top:18px; border-top:1px solid rgba(255,255,255,.1);
 }
+.view-store-link{
+  display:flex; align-items:center; gap:8px;
+  color:var(--amber-soft); text-decoration:none; font-size:13.5px; font-weight:700;
+  padding:11px 14px; border-radius:10px; border:1px solid rgba(242,169,59,.35);
+  margin-top:10px;
+}
+.view-store-link:hover{ background:rgba(242,169,59,.1); }
+.view-store-link.disabled{ opacity:.45; pointer-events:none; }
+.logout-btn{
+  margin-top:10px; background:transparent; border:1px solid rgba(255,255,255,.18);
+  color:rgba(247,241,228,.8); border-radius:10px; padding:10px 14px;
+  font-size:13.5px; font-weight:600; cursor:pointer;
+}
+.logout-btn:hover{ background:rgba(255,255,255,.06); color:#fff; }
 
 .admin-main{ background:var(--paper); padding:34px 40px 80px; overflow-y:auto; }
 .admin-topbar{
@@ -450,7 +464,7 @@ footer{
 .field{ margin-bottom:18px; }
 .field label{ display:block; font-size:13.5px; font-weight:700; margin-bottom:7px; }
 .field .hint{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
-.field input[type=text], .field input[type=password], .field input[type=tel], .field textarea, .field select{
+.field input[type=text], .field input[type=password], .field input[type=tel], .field input[type=number], .field textarea, .field select{
   width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:10px;
   font-family:inherit; font-size:14.5px; background:var(--paper); color:var(--ink);
 }
@@ -506,4 +520,256 @@ footer{
 /* ---------- Focus ---------- */
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
   outline:2px solid var(--teal-bright); outline-offset:2px;
+}
+
+/* ===================================================================
+   ADMIN AUTH SCREEN
+=================================================================== */
+.auth-screen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:var(--teal-deep);
+  background-image:
+    repeating-linear-gradient(90deg, var(--amber) 0 8px, transparent 8px 22px);
+  background-size:100% 3px;
+  background-position:top left, bottom left;
+  background-repeat:no-repeat;
+  padding:24px;
+}
+.auth-card{
+  width:100%; max-width:380px;
+  background:var(--paper);
+  border-radius:var(--radius-lg);
+  padding:36px 32px;
+  box-shadow:var(--shadow);
+  display:flex; flex-direction:column;
+}
+.auth-card h2{ font-size:24px; margin-bottom:8px; }
+.auth-sub{ color:var(--ink-soft); font-size:14px; margin-bottom:24px; }
+.auth-error{
+  color:var(--coral-deep); font-size:13px; font-weight:600;
+  background:rgba(232,93,76,.1); border-radius:8px; padding:9px 12px; margin-bottom:14px;
+}
+.auth-note{
+  font-size:12px; color:var(--ink-soft); text-align:center; margin-top:16px; line-height:1.5;
+}
+
+/* ===================================================================
+   PRODUCT EDITOR (Admin — photo gallery + fields)
+=================================================================== */
+.product-editor{
+  background:#fff; border:1px solid var(--line-soft); border-radius:var(--radius-md);
+  padding:20px; margin-bottom:16px;
+  display:grid; grid-template-columns:220px 1fr; gap:20px;
+}
+.product-editor-photos{ min-width:0; }
+.thumb-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.thumb{
+  position:relative; border-radius:10px; overflow:hidden; aspect-ratio:1/1;
+  border:1px solid var(--line-soft);
+}
+.thumb img{ width:100%; height:100%; object-fit:cover; }
+.thumb-remove{
+  position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%;
+  background:rgba(18,33,29,.72); color:#fff; border:none; cursor:pointer;
+  font-size:12px; display:flex; align-items:center; justify-content:center;
+}
+.thumb-remove:hover{ background:var(--coral-deep); }
+
+.dropzone{
+  aspect-ratio:1/1; border-radius:10px;
+  border:1.5px dashed var(--line); background:var(--paper);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; cursor:pointer; text-align:center; padding:10px;
+  font-size:11.5px; font-weight:600; color:var(--ink-soft);
+  transition:border-color .15s ease, background .15s ease;
+}
+.dropzone .dz-icon{ font-size:20px; }
+.dropzone.dragover{ border-color:var(--teal-bright); background:var(--paper-dim); color:var(--teal-deep); }
+.dropzone.dz-busy{ opacity:.55; pointer-events:none; }
+.dropzone-sm{ font-size:11px; }
+
+.product-editor-fields .field{ margin-bottom:14px; }
+.stock-toggle{
+  display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600;
+  padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--paper);
+  width:100%; cursor:pointer;
+}
+.stock-toggle input{ width:auto; }
+
+@media (max-width: 620px){
+  .product-editor{ grid-template-columns:1fr; }
+}
+
+/* ===================================================================
+   PUBLIC STOREFRONT (toko.html)
+=================================================================== */
+.store-body{ background:var(--paper); }
+
+.empty-store{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.empty-store-card{
+  max-width:420px; text-align:center; background:#fff; border-radius:var(--radius-lg);
+  padding:44px 34px; box-shadow:var(--shadow);
+}
+.empty-store-card h2{ font-size:22px; margin-bottom:12px; }
+.empty-store-card p{ color:var(--ink-soft); font-size:14.5px; margin-bottom:24px; }
+
+.store-header{
+  background:var(--teal-deep); color:#F7F1E4; padding:56px 0 44px; position:relative;
+}
+.store-header::after{
+  content:""; position:absolute; bottom:0; left:0; right:0; height:10px;
+  background:repeating-linear-gradient(90deg, var(--amber) 0 10px, transparent 10px 26px);
+  opacity:.85;
+}
+.store-header-inner h1{ color:#fff; font-size:clamp(30px,4vw,44px); margin:12px 0 12px; }
+.store-desc{ color:rgba(247,241,228,.75); font-size:15.5px; max-width:560px; margin-bottom:20px; }
+.store-badges{ display:flex; gap:10px; flex-wrap:wrap; }
+.store-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:13px; font-weight:600; padding:8px 14px; border-radius:999px;
+  background:rgba(255,255,255,.1); color:#F7F1E4; text-decoration:none;
+  border:1px solid rgba(255,255,255,.16);
+}
+.store-badge-wa{ background:#25D366; color:#08351d; border-color:transparent; }
+.store-badge-wa:hover{ background:#1fbd5a; }
+
+.store-section{ padding:52px 0; }
+.store-section-head{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
+  margin-bottom:26px;
+}
+.store-section-head h2{ font-size:26px; }
+.search-bar{
+  border:1px solid var(--line); border-radius:999px; padding:11px 18px;
+  font-family:inherit; font-size:14px; background:#fff; min-width:220px;
+}
+.search-bar:focus{ outline:2px solid var(--teal-bright); outline-offset:1px; }
+
+.product-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:20px;
+}
+.product-card{
+  background:#fff; border:1px solid var(--line-soft); border-radius:var(--radius-md);
+  overflow:hidden; transition:transform .18s ease, box-shadow .18s ease;
+}
+.product-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow); }
+.product-photo{
+  width:100%; aspect-ratio:1/1; border:none; padding:0; cursor:pointer;
+  background:var(--paper-dim); position:relative; display:block;
+}
+.product-photo img{ width:100%; height:100%; object-fit:cover; }
+.product-photo:disabled{ cursor:default; }
+.no-photo{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:12.5px; color:var(--ink-soft); font-weight:600;
+}
+.product-photo-count{
+  position:absolute; bottom:8px; right:8px; background:rgba(18,33,29,.7); color:#fff;
+  font-size:11px; padding:3px 8px; border-radius:999px; font-family:var(--font-mono);
+}
+.stock-flag{
+  position:absolute; top:8px; left:8px; background:var(--coral); color:#fff;
+  font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:999px;
+  text-transform:uppercase; letter-spacing:.03em;
+}
+.product-body{ padding:16px; }
+.cat-tag{
+  font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--teal); font-weight:700;
+}
+.product-body h3{ font-size:16.5px; margin:6px 0 6px; }
+.product-body p{
+  color:var(--ink-soft); font-size:13px; margin-bottom:12px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.price-tag{
+  font-family:var(--font-mono); font-weight:700; font-size:15px; color:var(--coral-deep);
+}
+
+/* Lightbox */
+.lightbox{
+  position:fixed; inset:0; background:rgba(10,20,17,.92); z-index:200;
+  display:none; align-items:center; justify-content:center;
+}
+.lightbox.open{ display:flex; }
+.lightbox img{ max-width:80vw; max-height:80vh; border-radius:12px; }
+.lightbox-close{
+  position:absolute; top:22px; right:26px; background:none; border:none; color:#fff;
+  font-size:22px; cursor:pointer;
+}
+.lightbox-nav{
+  position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.12);
+  border:none; color:#fff; width:44px; height:44px; border-radius:50%; font-size:24px; cursor:pointer;
+}
+.lightbox-nav:hover{ background:rgba(255,255,255,.22); }
+.lightbox-prev{ left:20px; }
+.lightbox-next{ right:20px; }
+.lightbox-counter{
+  position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+  font-family:var(--font-mono); color:rgba(255,255,255,.75); font-size:12.5px;
+}
+
+/* FAQ accordion */
+.faq-accordion{ display:flex; flex-direction:column; gap:10px; max-width:760px; }
+.faq-item{ background:#fff; border:1px solid var(--line-soft); border-radius:12px; overflow:hidden; }
+.faq-q{
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  background:none; border:none; padding:16px 18px; text-align:left; cursor:pointer;
+  font-size:14.5px; font-weight:700; color:var(--ink);
+}
+.faq-caret{ transition:transform .18s ease; color:var(--ink-soft); }
+.faq-item.open .faq-caret{ transform:rotate(180deg); }
+.faq-a{ max-height:0; overflow:hidden; transition:max-height .2s ease; }
+.faq-item.open .faq-a{ max-height:200px; }
+.faq-a p{ padding:0 18px 16px; color:var(--ink-soft); font-size:13.5px; line-height:1.6; }
+
+.store-footer{
+  border-top:1px solid var(--line-soft); padding:26px 0; margin-top:20px;
+  text-align:center; font-size:13px; color:var(--ink-soft);
+}
+.store-footer a{ color:var(--teal); font-weight:700; text-decoration:none; }
+
+/* Floating chat widget */
+.chat-fab{
+  position:fixed; bottom:24px; right:24px; z-index:150;
+  width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
+  background:var(--coral); color:#fff; font-size:24px;
+  box-shadow:0 14px 30px -12px rgba(232,93,76,.6);
+  display:flex; align-items:center; justify-content:center;
+  animation:fabPulse 2.6s ease-in-out infinite;
+}
+@keyframes fabPulse{
+  0%,100%{ box-shadow:0 14px 30px -12px rgba(232,93,76,.6); }
+  50%{ box-shadow:0 14px 34px -8px rgba(232,93,76,.85); }
+}
+.chat-panel{
+  position:fixed; bottom:94px; right:24px; z-index:150;
+  width:min(360px, calc(100vw - 32px)); height:min(520px, calc(100vh - 140px));
+  background:#F7F1E4; border-radius:18px; box-shadow:var(--shadow);
+  display:flex; flex-direction:column; overflow:hidden;
+  transform:translateY(16px) scale(.97); opacity:0; pointer-events:none;
+  transition:transform .18s ease, opacity .18s ease;
+}
+.chat-panel.open{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
+.chat-panel-head{
+  background:var(--teal-deep); color:#fff; padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between; font-weight:700; font-size:14.5px;
+}
+.chat-panel-head button{ background:none; border:none; color:#fff; font-size:16px; cursor:pointer; }
+.chat-panel-body{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.chat-offline{ font-size:13px; color:var(--ink-soft); text-align:center; padding:20px 10px; }
+.chat-panel-input{ display:flex; gap:8px; padding:12px; border-top:1px solid var(--line-soft); background:#fff; }
+.chat-panel-input input{
+  flex:1; border:1px solid var(--line); border-radius:999px; padding:10px 15px;
+  font-family:inherit; font-size:13.5px;
+}
+.chat-panel-input button{
+  width:38px; height:38px; border-radius:50%; border:none; background:var(--amber);
+  color:var(--teal-deep); cursor:pointer; flex-shrink:0;
+}
+
+@media (max-width: 640px){
+  .product-editor{ grid-template-columns:1fr; }
 }
