@@ -1,4 +1,6 @@
 // Lapak.AI — landing page demo chat (scripted, no API key required)
+// This is just marketing flavor on index.html. The REAL, live chat
+// connected to actual admin data lives in js/store.js (toko.html).
 
 const demoChat = document.getElementById('demoChat');
 const demoInput = document.getElementById('demoInput');
@@ -7,7 +9,6 @@ const demoSend = document.getElementById('demoSend');
 const SHOP_NAME = "Kedai Kopi Sumedang";
 const SHOP_INITIAL = "K";
 
-// Canned knowledge base used to fake a "smart" reply for common keywords
 const DEMO_SCRIPT = [
   {
     match: ["robusta", "kopi"],
